@@ -10,6 +10,7 @@ var connect = require('gulp-connect')
 var imagemin = require('gulp-imagemin')
 var open = require('open')
 var babel = require('gulp-babel')
+var clean = require('gulp-clean')
 // var $ = require('gulp-load-plugins')
 
 // 注册任务
@@ -18,7 +19,7 @@ var babel = require('gulp-babel')
 // })
 
 // 合并压缩js文件
-gulp.task('js', function () {
+gulp.task('js', ['clean-dist'], function () {
   return gulp.src('src/js/**/*.js')
     .pipe(babel({
       presets: ['es2015']
@@ -33,7 +34,7 @@ gulp.task('js', function () {
 })
 
 // 注册转换less的任务
-gulp.task('less', function () {
+gulp.task('less', ['clean-dist'], function () {
   return gulp.src('src/less/*.less')
     .pipe(less()) // 编译less文件为css文件
     .pipe(gulp.dest('src/css')) // 将less编译为css文件后存放到css文件夹中，等待后续统一合并
@@ -43,6 +44,7 @@ gulp.task('less', function () {
 gulp.task('css', ['less'], function () {
   return gulp.src('src/css/*.css')
     .pipe(concat('build.css'))
+    .pipe(gulp.dest('dist/css/'))
     .pipe(rename({ suffix: '.min' }))
     .pipe(cssClean({ compatibility: 'ie8' })) // 压缩、设置兼容到ie8
     .pipe(gulp.dest('dist/css/'))
@@ -51,7 +53,7 @@ gulp.task('css', ['less'], function () {
 })
 
 // 压缩html
-gulp.task('html', function () {
+gulp.task('html', ['clean-dist'], function () {
   return gulp.src('index.html')
     .pipe(htmlMin({ collapseWhitespace: true })) // 压缩html
     .pipe(gulp.dest('dist/')) // 输出
@@ -60,7 +62,7 @@ gulp.task('html', function () {
 })
 
 // 压缩图片
-gulp.task('images', function () {
+gulp.task('images', ['clean-dist'], function () {
   return gulp.src('src/images/*.*')
     .pipe(imagemin({ progressive: true }))
     .pipe(gulp.dest('dist/images/'))
@@ -68,14 +70,6 @@ gulp.task('images', function () {
     .pipe(connect.reload())
 })
 
-// 监视任务
-gulp.task('watch', ['default'], function () {
-  // 开启监听
-  livereload.listen();
-  // 确认监听的目标以及绑定相应的任务
-  gulp.watch('src/js/*.js', ['js']);
-  gulp.watch(['src/css/*.css', 'src/less/*.less'], ['css'])
-})
 
 // 注册监视任务（全自动）
 gulp.task('server', ['default'], function () {
@@ -94,5 +88,10 @@ gulp.task('server', ['default'], function () {
   open('http://localhost:5000')
 })
 
+// 清理dist文件
+gulp.task('clean-dist', function () {
+  return gulp.src('dist')
+    .pipe(clean());
+});
 
-gulp.task('default', ['js', 'less', 'css', 'images', 'html'])
+gulp.task('default', ['js', 'css', 'images', 'html'])
