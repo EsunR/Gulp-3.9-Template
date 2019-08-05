@@ -1,4 +1,21 @@
-> Gulp学习版本为3.9.1
+# 0. 说明
+
+Gulp 版本为 `3.9.1`
+
+模板已支持：
+
+- 编译less
+- 压缩合并css
+- 压缩合并JS
+- ES6语法支持
+- 压缩图片
+- 热更新
+
+食用：
+
+```sh
+gulp server
+```
 
 # 1. Gulp特点
 
@@ -366,7 +383,7 @@ gulp.task('server', ['default'], function () {
 gulp server
 ```
 
-## 12. 扩展
+# 12. 扩展
 
 ### 12.1 使用 open 模块自动打开浏览器
 
@@ -434,3 +451,4 @@ gulp.task('js', function () {
 使用 `$` 对象引入的 gulp 插件必须有其对应的命名方法，其规则为：
 - 忽略连接符前的 gulp，直接写插件名称，如：`gulp-concat` 插件对应的引入方法为 `$.concat`
 - 如果有多个连接符，则采用驼峰命名，如：`gulp-clean-css` 插件对应的引入方法为 `$.cleanCss`
+
