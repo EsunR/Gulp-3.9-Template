@@ -5,16 +5,22 @@ Gulp 版本为 `3.9.1`
 模板已支持：
 
 - 编译less
+- 编译sass
 - 压缩合并css
 - 压缩合并JS
 - ES6语法支持
 - 压缩图片
 - 热更新
+- 自动删除文件
 
 食用：
 
 ```sh
+开发：
 gulp server
+
+构建：
+gulp build
 ```
 
 # 1. Gulp特点

@@ -11,6 +11,11 @@ var imagemin = require('gulp-imagemin')
 var open = require('open')
 var babel = require('gulp-babel')
 var clean = require('gulp-clean')
+var gulp = require('gulp');
+var sass = require('gulp-sass');
+sass.compiler = require('node-sass');
+var gulpSequence = require('gulp-sequence')
+
 // var $ = require('gulp-load-plugins')
 
 // 注册任务
@@ -19,7 +24,7 @@ var clean = require('gulp-clean')
 // })
 
 // 合并压缩js文件
-gulp.task('js', ['clean-dist'], function () {
+gulp.task('js', function () {
   return gulp.src('src/js/**/*.js')
     .pipe(babel({
       presets: ['es2015']
@@ -34,14 +39,21 @@ gulp.task('js', ['clean-dist'], function () {
 })
 
 // 注册转换less的任务
-gulp.task('less', ['clean-dist'], function () {
+gulp.task('less', function () {
   return gulp.src('src/less/*.less')
     .pipe(less()) // 编译less文件为css文件
     .pipe(gulp.dest('src/css')) // 将less编译为css文件后存放到css文件夹中，等待后续统一合并
 })
 
+// 注册转换sass的任务
+gulp.task('sass', function () {
+  return gulp.src('src/sass/**/*.scss')
+    .pipe(sass().on('error', sass.logError))
+    .pipe(gulp.dest('src/css'));
+});
+
 // 合并压缩css文件
-gulp.task('css', ['less'], function () {
+gulp.task('css', ['less', 'sass'], function () {
   return gulp.src('src/css/*.css')
     .pipe(concat('build.css'))
     .pipe(gulp.dest('dist/css/'))
@@ -53,7 +65,7 @@ gulp.task('css', ['less'], function () {
 })
 
 // 压缩html
-gulp.task('html', ['clean-dist'], function () {
+gulp.task('html', function () {
   return gulp.src('index.html')
     .pipe(htmlMin({ collapseWhitespace: true })) // 压缩html
     .pipe(gulp.dest('dist/')) // 输出
@@ -62,9 +74,15 @@ gulp.task('html', ['clean-dist'], function () {
 })
 
 // 压缩图片
-gulp.task('images', ['clean-dist'], function () {
-  return gulp.src('src/images/*.*')
-    .pipe(imagemin({ progressive: true }))
+gulp.task('images', function () {
+  return gulp.src('src/images/**/*.*')
+    .pipe(imagemin({
+      optimizationLevel: 5, //类型：Number  默认：3  取值范围：0-7（优化等级）
+      progressive: true, //类型：Boolean 默认：false 无损压缩jpg图片
+      interlaced: true, //类型：Boolean 默认：false 隔行扫描gif进行渲染
+      multipass: true, //类型：Boolean 默认：false 多次优化svg直到完全优化
+      // use: [pngquant()] //使用pngquant深度压缩png图片
+    }))
     .pipe(gulp.dest('dist/images/'))
     .pipe(livereload())
     .pipe(connect.reload())
@@ -80,10 +98,10 @@ gulp.task('server', ['default'], function () {
     port: 5000
   })
   // 确认监听的目标以及绑定相应的任务
-  gulp.watch('src/js/*.js', ['js']);
-  gulp.watch(['src/css/*.css', 'src/less/*.less'], ['css']);
+  gulp.watch('src/js/**/*.js', ['js']);
+  gulp.watch(['src/css/*.css', 'src/less/**/*.less', 'src/sass/**/*.scss'], ['css']);
   gulp.watch(['*.html'], ['html']);
-  gulp.watch('src/images/*.*', ['images']);
+  gulp.watch('src/images/**/*.*', ['images']);
   // 打开浏览器
   open('http://localhost:5000')
 })
@@ -94,4 +112,7 @@ gulp.task('clean-dist', function () {
     .pipe(clean());
 });
 
-gulp.task('default', ['js', 'css', 'images', 'html'])
+
+gulp.task('default', ['js', 'css', 'images', 'html']);
+
+gulp.task('build', gulpSequence('clean-dist', 'default'));
